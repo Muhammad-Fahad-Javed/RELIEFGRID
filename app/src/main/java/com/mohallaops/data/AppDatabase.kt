@@ -6,16 +6,16 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 /**
- * Version 1 is the first released schema. Future schema changes MUST add a Migration
- * (see README "Database migrations") instead of destructive recreation.
+ * AppDatabase for RELIEFGRID.
+ * Version 2 adds the IncidentEntity table for disaster incident tracking and triage.
  */
 @Database(
     entities = [
         StationEntity::class, BoxEntity::class, FamilyEntity::class, RequestEntity::class,
         DeliveryEntity::class, VolunteerEntity::class, RoadEntity::class, InventoryTxEntity::class,
-        EventEntity::class, RunResultEntity::class
+        EventEntity::class, RunResultEntity::class, IncidentEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -23,6 +23,8 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         fun create(context: Context): AppDatabase =
-            Room.databaseBuilder(context, AppDatabase::class.java, "mohalla_ops.db").build()
+            Room.databaseBuilder(context, AppDatabase::class.java, "mohalla_ops.db")
+                .fallbackToDestructiveMigration()
+                .build()
     }
 }

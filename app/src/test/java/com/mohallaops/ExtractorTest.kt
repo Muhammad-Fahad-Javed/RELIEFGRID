@@ -1,6 +1,7 @@
 package com.mohallaops
 
 import com.mohallaops.ai.LocalExtractor
+import com.mohallaops.ai.LocalIncidentTriage
 import com.mohallaops.ai.Planner
 import com.mohallaops.data.BoxEntity
 import com.mohallaops.data.FamilyEntity
@@ -13,6 +14,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ExtractorTest {
+    // -------------------------------------------------------------
+    // Supply Request Extraction Tests
+    // -------------------------------------------------------------
     @Test fun urduExampleFromSpec() {
         val r = LocalExtractor.extract("السلام علیکم، ہمارے گھر میں چار افراد ہیں اور ہمیں ایک فوڈ باکس چاہیے۔ ہم ساؤتھ اسٹیشن کے قریب رہتے ہیں۔")
         assertEquals("ur", r.language)
@@ -43,15 +47,24 @@ class ExtractorTest {
         assertNull(r.stationId)
     }
 
-    private val stations = listOf(StationEntity("NORTH", "North Station", "l", 0f, 0f), StationEntity("SOUTH", "South Station", "l", 0f, 0f))
+    // -------------------------------------------------------------
+    // Planner Tests
+    // -------------------------------------------------------------
+    private val stations = listOf(
+        StationEntity("NORTH", "North Station", "North Lead", 0f, 0f),
+        StationEntity("SOUTH", "South Station", "South Lead", 0f, 0f)
+    )
     private fun fams() = listOf("N1", "N2").map { FamilyEntity("FAM-$it", it, "NORTH", 1, S.WAITING, 0f, 0f) } +
         listOf("S1", "S2", "S3", "S4").map { FamilyEntity("FAM-$it", it, "SOUTH", 1, S.WAITING, 0f, 0f) }
-    private fun boxes() = (1..5).map { BoxEntity("NORTH-00$it", "NORTH", "NORTH", S.AVAILABLE) } + BoxEntity("SOUTH-001", "SOUTH", "SOUTH", S.AVAILABLE)
+    private fun boxes() = (1..5).map { BoxEntity("NORTH-00$it", "NORTH", "NORTH", S.AVAILABLE) } +
+        BoxEntity("SOUTH-001", "SOUTH", "SOUTH", S.AVAILABLE)
 
     @Test fun plannerSuggestsMovingThreeBoxes() {
         val s = Planner.analyse(stations, boxes(), fams(), roadOpen = true)
         assertNotNull(s)
-        assertEquals("NORTH", s!!.from); assertEquals("SOUTH", s.to); assertEquals(3, s.count)
+        assertEquals("NORTH", s!!.from)
+        assertEquals("SOUTH", s.to)
+        assertEquals(3, s.count)
         assertTrue(s.executable)
     }
 
@@ -62,7 +75,47 @@ class ExtractorTest {
     }
 
     @Test fun plannerQuietWhenBalanced() {
-        val balanced = boxes().map { if (it.id in listOf("NORTH-003", "NORTH-004", "NORTH-005")) it.copy(ownerStationId = "SOUTH") else it }
+        val balanced = boxes().map {
+            if (it.id in listOf("NORTH-003", "NORTH-004", "NORTH-005")) it.copy(ownerStationId = "SOUTH") else it
+        }
         assertNull(Planner.analyse(stations, balanced, fams(), roadOpen = true))
+    }
+
+    // -------------------------------------------------------------
+    // Emergency & Disaster Incident AI Triage Tests
+    // -------------------------------------------------------------
+    @Test fun urduCriticalTrappedTriage() {
+        val report = "چھت پر پانی چڑھ رہا ہے اور ہمارے ساتھ ایک بچہ اور بوڑھے پھنسے ہوئے ہیں، ساؤتھ اسٹیشن کے قریب فوری مدد بھیجیں۔"
+        val t = LocalIncidentTriage.triage(report)
+        assertEquals(S.CAT_TRAPPED, t.category)
+        assertEquals(S.URGENCY_CRITICAL, t.urgency)
+        assertEquals("SOUTH", t.stationId)
+        assertTrue(t.requiresHumanReview)
+        assertTrue(t.confidence >= 0.7f)
+    }
+
+    @Test fun englishRoadBlockageTriage() {
+        val report = "The culvert road near north station is completely washed out and flooded with water."
+        val t = LocalIncidentTriage.triage(report)
+        assertEquals(S.CAT_ROAD, t.category)
+        assertEquals("NORTH", t.stationId)
+        assertTrue(t.urgency in listOf(S.URGENCY_HIGH, S.URGENCY_MEDIUM))
+        assertTrue(t.requiresHumanReview)
+    }
+
+    @Test fun englishMedicalEmergencyTriage() {
+        val report = "Severe medical emergency! Diabetic patient with bleeding injury near south sector."
+        val t = LocalIncidentTriage.triage(report)
+        assertEquals(S.CAT_MEDICAL, t.category)
+        assertEquals(S.URGENCY_CRITICAL, t.urgency)
+        assertEquals("SOUTH", t.stationId)
+    }
+
+    @Test fun vagueReportHighlightsMissingInformation() {
+        val report = "Help there is an issue"
+        val t = LocalIncidentTriage.triage(report)
+        assertTrue(t.missingInfo.isNotEmpty())
+        assertTrue(t.requiresHumanReview)
+        assertTrue(t.confidence < 0.6f)
     }
 }

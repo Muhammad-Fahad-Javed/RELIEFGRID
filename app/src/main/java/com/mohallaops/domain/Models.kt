@@ -68,4 +68,24 @@ object S {
 
     const val SYNCED = "SYNCED"
     const val SYNC_WAITING = "WAITING"
+
+    // Disaster & Emergency Incident Reporting
+    const val INC_REPORTED = "REPORTED"
+    const val INC_VERIFIED = "VERIFIED"
+    const val INC_IN_PROGRESS = "IN_PROGRESS"
+    const val INC_RESOLVED = "RESOLVED"
+
+    // Incident Urgency Levels
+    const val URGENCY_CRITICAL = "CRITICAL"
+    const val URGENCY_HIGH = "HIGH"
+    const val URGENCY_MEDIUM = "MEDIUM"
+    const val URGENCY_LOW = "LOW"
+
+    // Incident Disaster Categories
+    const val CAT_FLOOD = "FLOOD"
+    const val CAT_ROAD = "ROAD_BLOCKAGE"
+    const val CAT_MEDICAL = "MEDICAL"
+    const val CAT_TRAPPED = "TRAPPED"
+    const val CAT_INFRASTRUCTURE = "INFRASTRUCTURE"
+    const val CAT_OTHER = "OTHER"
 }

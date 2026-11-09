@@ -1,0 +1,20 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Incident damage and hazard photos
+    match /incidents/{incidentId}/{fileName} {
+      // Allow read by anyone coordinating relief
+      allow read: if true;
+
+      // Allow upload if file is an image and under 5MB
+      allow write: if request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // Default deny for other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Data extraction rules (Android 12+ API 31+).
+    Mirrors backup_rules.xml for the new API.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="sharedpref" path="mohalla_prefs.xml" />
+        <exclude domain="database" path="mohalla_ops.db" />
+        <exclude domain="database" path="mohalla_ops.db-wal" />
+        <exclude domain="database" path="mohalla_ops.db-shm" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="database" path="mohalla_ops.db" />
+    </device-transfer>
+</data-extraction-rules>

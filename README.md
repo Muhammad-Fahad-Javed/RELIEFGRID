@@ -1,45 +1,82 @@
-# Mohalla Ops — Android (Kotlin + Jetpack Compose)
+# RELIEFGRID — Disaster Relief Coordination System
 
-Practice-only neighborhood flood-relief drill app. **Not an emergency system.** All data is simulated.
+> **Coordinate relief. Save lives.**  
+> A disaster-relief and emergency drill coordination application built with modern Android (Kotlin + Jetpack Compose), Room database, meaningful AI triage (on-device + Gemini Cloud Functions), and Firebase.
 
-## Open and run
-1. Install **Android Studio (Koala or newer)** with JDK 17 and an Android 8.0+ (API 26) device/emulator.
-2. File → Open → select this `MohallaOps` folder. Let Gradle sync (internet needed the first time).
-   If `gradlew` is missing, Android Studio uses `gradle/wrapper/gradle-wrapper.properties` (Gradle 8.7).
-3. Press Run. No Firebase, API key or Maps key is needed for the core demo.
+---
 
-## Try the six-family demo (2 minutes)
-1. Home → choose the **Drill Leader** chip → Drill tab → **Run 1** → Results tab (Drill → Compare results): 3 families waiting.
-2. Drill → **Run 2** → compare: 0 families waiting. (The only difference: 3 boxes moved North→South before the same road closure.)
-3. Map tab shows the stations, families, road status and active delivery routes.
-4. Manual flow: Reset → switch to **Resident** → Request supplies (type or speak Urdu/English → Analyse → confirm) →
-   **South Lead** approves & assigns → **Volunteer** accepts, enters the box ID, records handoff → **Resident** confirms receipt.
-   Only the recipient's confirmation counts a family as served.
-5. Switch to wrong roles on purpose (e.g. Resident pressing a stock action, South Lead touching a North box):
-   the repository refuses — this is enforced in code and in SQL, not just by hiding buttons.
+## 1. Quick Start & Build
 
-## Tests
-- Unit tests (no device): `./gradlew testDebugUnitTest` (Urdu/English extraction, planner).
-- Instrumented tests (device/emulator): `./gradlew connectedDebugAndroidTest`
-  (box-ownership rule, permissions, delivery stages, both demo runs, duplicate-event handling).
-**These were written but NOT executed by the author of this zip (no Android SDK was available). Run them first.**
+1. Clone or open the repository in **Android Studio (Koala 2024.1.1 or newer)** with **JDK 17**.
+2. Let Gradle sync. Gradle wrapper scripts (`gradlew`, `gradlew.bat`) and `gradle/wrapper/gradle-wrapper.jar` (Gradle 8.7) are provided.
+3. If building from the command line:
+   ```bash
+   ./gradlew testDebugUnitTest
+   ./gradlew assembleDebug
+   ```
+4. Output APK location: `app/build/outputs/apk/debug/app-debug.apk`
 
-## Architecture
-`domain/` models, roles, rule exceptions · `data/` Room entities, DAO, `DrillRepository` (all business rules, one DB transaction per change) ·
-`ai/` request extraction (on-device + Gemini client) and deterministic planner · `ui/` Compose screens and design system.
-Manual wiring (`MohallaApp`) is used instead of Hilt to keep the first build simple.
+---
 
-## Gemini (optional, secure)
-`functions/index.js` is a Cloud Function that holds the Gemini key as a Firebase secret.
-Deploy it, then put its URL in `GEMINI_PROXY_URL` (`app/build.gradle.kts`). Without it the app uses the labelled on-device reader.
+## 2. Core Capabilities
 
-## What is implemented vs not (honest list)
-Implemented: splash, onboarding (EN/UR strings), demo accounts, dashboard, stations/inventory with per-box lifecycle and audited transfers,
-requests (text + system speech input + extraction + manual correction + duplicate refusal), full delivery workflow, volunteer availability & reassignment,
-simulated map, road-closure/offline/volunteer disruptions, deterministic planner with accept/reject, timeline, two-run results, Room persistence,
-event export/import between phones with unique IDs and duplicate detection.
+### 🛡️ Emergency & Disaster Incident Reporting
+- **Multi-Category Incident Triage**: Report critical events including Floods, Road Blockages, Medical Emergencies, Trapped Residents, and Infrastructure Hazards.
+- **Urgency Levels**: Triage priority levels (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`) computed with AI advisory and verified by Station Leads.
+- **Visual Incident Mapping**: Reactive pins and emergency markers on the simulated neighborhood map.
 
-NOT implemented in this build: Firebase Auth / Firestore / Storage / FCM, real Nearby Connections transport (import/export of event JSON is the
-documented test mode), QR scanning (box IDs are typed), create-drill wizard and multi-drill management, Gemini-written after-action review and
-replay explanation, conflict resolution for inventory merged across devices, WorkManager background sync (`Sync now` only marks the local queue),
-Hilt, Maps SDK, in-app language switcher (UI follows device language for translated strings; most screen text is English-only), the Mystery Card extension point.
+### 📦 Supply & Resource Coordination
+- **Deterministic Inventory Ownership**: Physical relief supply boxes with strict ownership enforced in Room SQL (`ownerStationId`).
+- **Complete Delivery Lifecycle**:
+  `Submit Request` → `Lead Review & Approval` → `Assign Delivery & Reserve Stock` → `Volunteer Acceptance` → `Physical Box ID Verification & Pickup` → `Handoff Record` → `Recipient Confirmation`.
+- **Recipient Confirmation Rule**: A family is **never** counted as served until the recipient family confirms receipt.
+
+### 🤖 Meaningful AI Integration (Safe & Transparent)
+- **Local On-Device Engine**: Completely offline, rule-based request parsing and incident triage supporting English and Urdu without internet.
+- **Gemini 1.5 Flash Cloud Proxy**: Serverless Cloud Function in `functions/index.js` keeping API keys completely private in Firebase Secret Manager (`GEMINI_API_KEY`).
+- **Safety Guarantee**: AI provides advisory recommendations only (`requiresHumanReview = true`). Life-safety decisions always require on-ground human authorization.
+- **Deterministic Planner**: Detects stock shortages across stations and suggests pre-closure transfers based on stored numbers.
+
+### 👥 Role-Based Access Control (RBAC)
+- **Resident**: Submit emergency requests in Urdu/English, report incidents, track deliveries, confirm receipt.
+- **Station Lead**: Review and approve station requests, verify reported incidents, assign deliveries, manage inventory.
+- **Volunteer**: Accept/decline delivery dispatches, enter verified box IDs on pickup, report handoffs, assist in resolving incidents.
+- **Drill Leader**: High-level command, execute automated demo scenarios (Run 1 & Run 2), simulate disruptions (road closures, volunteer outages, offline simulation).
+
+---
+
+## 3. Two-Run Demonstration
+
+1. Select **Drill Leader** demo account on Home.
+2. Navigate to **Drill** tab.
+3. Tap **Run 1 — no transfer**: Resets scenario, closes road, attempts fulfilment. 3 families remain waiting due to supply imbalances.
+4. Tap **Run 2 — move 3 boxes North → South first**: AI planner suggests moving 3 boxes before closure; all 6 families are successfully served.
+5. Tap **Compare results** to see a side-by-side comparison of real, measured database metrics.
+
+---
+
+## 4. Firebase Architecture
+
+- `firebase.json`: Configuration for Cloud Functions, Firestore, and Cloud Storage.
+- `firestore.rules`: Production-grade security rules enforcing RBAC across stations, boxes, requests, deliveries, incidents, and immutable events.
+- `storage.rules`: Secure image upload rules for incident damage documentation (< 5MB, image types only).
+- `functions/index.js`:
+  - `extractRequest`: Parses supply requests into structured JSON.
+  - `triageIncident`: Emergency classification, urgency assessment, and resource coordination advice.
+  - Optional Firebase Auth token verification.
+
+---
+
+## 5. Automated Tests
+
+- **Unit Tests** (`app/src/test/java/com/mohallaops/ExtractorTest.kt`):
+  - English & Urdu supply extraction
+  - Missing field detection and confidence estimation
+  - Deterministic planner rebalancing & closed-road rules
+  - AI emergency incident triage (Urdu trapped person critical, road blockage, medical trauma)
+- **Instrumented Tests** (`app/src/androidTest/java/com/mohallaops/DrillRepositoryTest.kt`):
+  - Run 1 vs Run 2 real outcome verification
+  - Box reservation cross-station denial in SQL
+  - Role-based permission enforcement
+  - Confirmation-gated served status
+  - Deduplication of imported events

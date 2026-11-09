@@ -1,0 +1,30 @@
+{
+  "_comment": "RELIEFGRID: Replace this file with your google-services.json downloaded from the Firebase Console (https://console.firebase.google.com).",
+  "project_info": {
+    "project_number": "123456789000",
+    "project_id": "reliefgrid-disaster-relief",
+    "storage_bucket": "reliefgrid-disaster-relief.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123456789000:android:abcdef0123456789abcdef",
+        "android_client_info": {
+          "package_name": "com.mohallaops"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "YOUR_API_KEY_HERE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

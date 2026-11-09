@@ -1,20 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">محلہ اپس</string>
-    <string name="tagline">آج مشق کریں، کل بہتر جواب دیں۔</string>
+    <!-- App identity -->
+    <string name="app_name">RELIEFGRID</string>
+    <string name="tagline">ہم آہنگی سے امداد پہنچائیں۔ زندگیاں بچائیں۔</string>
+    <string name="practice_disclaimer">مشقی ڈرل — فرضی ڈیٹا، یہ لائیو ہنگامی نظام نہیں ہے</string>
+
+    <!-- Navigation labels -->
     <string name="nav_home">ہوم</string>
     <string name="nav_stations">اسٹیشن</string>
     <string name="nav_drill">مشق</string>
     <string name="nav_map">نقشہ</string>
+    <string name="nav_incidents">واقعات</string>
     <string name="nav_activity">سرگرمی</string>
+    <string name="nav_inventory">انوینٹری</string>
+
+    <!-- Onboarding -->
     <string name="skip">چھوڑیں</string>
     <string name="next">آگے</string>
     <string name="get_started">شروع کریں</string>
     <string name="ob1_title">ہنگامی حالات سے پہلے مشق کریں</string>
-    <string name="ob1_body">محلے کی مشقیں دکھاتی ہیں کہ منصوبہ کہاں ناکام ہوتا ہے، اصل سیلاب سے پہلے۔</string>
+    <string name="ob1_body">محلے کی امدادی مشقیں دکھاتی ہیں کہ منصوبہ کہاں ناکام ہوتا ہے — اصل آفت آنے سے پہلے۔ RELIEFGRID سب کو ہم آہنگ رکھتا ہے۔</string>
     <string name="ob2_title">سامان اور رضاکاروں کو منظم کریں</string>
-    <string name="ob2_body">رہائشی، اسٹیشن لیڈ، رضاکار اور ڈرل لیڈر سب کی اپنی ذمہ داریاں ہیں۔</string>
+    <string name="ob2_body">رہائشی، اسٹیشن لیڈ، رضاکار اور ڈرل لیڈر سب کی اپنی واضح ذمہ داریاں ہیں جو ایپ نافذ کرتی ہے۔</string>
     <string name="ob3_title">بہتر منصوبہ دریافت کریں</string>
     <string name="ob3_body">ایک ہی منظرنامے کی دو مشقوں کا موازنہ کریں اور دیکھیں کون سا منصوبہ زیادہ خاندانوں تک پہنچا۔</string>
     <string name="demo_banner">مشقی ڈرل — فرضی ڈیٹا، یہ ہنگامی نظام نہیں ہے</string>
+
+    <!-- Home screen -->
+    <string name="demo_account_label">ڈیمو اکاؤنٹ</string>
+    <string name="drill_active">ڈرل فعال</string>
+    <string name="continue_drill">ڈرل جاری رکھیں</string>
+    <string name="quick_actions">فوری اقدامات</string>
+    <string name="request_supplies">سامان کی درخواست کریں</string>
+    <string name="track_my_request">میری درخواست ٹریک کریں</string>
+    <string name="run_or_reset_drill">ڈرل چلائیں یا دوبارہ شروع کریں</string>
+    <string name="see_neighborhood_map">محلے کا نقشہ دیکھیں</string>
+
+    <!-- Stations screen -->
+    <string name="my_requests">میری درخواستیں</string>
+    <string name="my_deliveries">میری ترسیلات</string>
+    <string name="my_station">میرا اسٹیشن</string>
+    <string name="all_stations">تمام اسٹیشن</string>
+    <string name="no_requests">کوئی درخواست نہیں</string>
+    <string name="no_requests_body">اس اسٹیشن کی درخواستیں یہاں نظر آئیں گی۔</string>
+    <string name="no_request_yet">ابھی کوئی درخواست نہیں</string>
+    <string name="no_request_yet_body">سامان کی درخواست کرنے کے لیے "سامان کی درخواست کریں" دبائیں — اردو یا انگریزی میں۔</string>
+    <string name="assignments">تفویضات</string>
+    <string name="nothing_assigned">کچھ تفویض نہیں</string>
+    <string name="nothing_assigned_body">آپ کو تفویض کردہ ترسیلات یہاں نظر آئیں گی۔</string>
+    <string name="approve">منظور کریں</string>
+    <string name="reject">رد کریں</string>
+    <string name="assign_delivery">ترسیل تفویض کریں</string>
+    <string name="accept">قبول کریں</string>
+    <string name="decline">انکار کریں</string>
+    <string name="record_handoff">حوالگی ریکارڈ کریں</string>
+    <string name="confirm_receipt">تصدیق کریں کہ میں نے وصول کیا</string>
+    <string name="cancel">منسوخ</string>
+    <string name="confirm">تصدیق</string>
+
+    <!-- Request sheet -->
+    <string name="request_supplies_title">سامان کی درخواست</string>
+    <string name="urdu_voice">اردو آواز</string>
+    <string name="english_voice">انگریزی آواز</string>
+    <string name="speak_request">درخواست بولیں</string>
+    <string name="analyse_message">پیغام کا تجزیہ کریں</string>
+    <string name="analysing">تجزیہ ہو رہا ہے…</string>
+    <string name="confirm_or_correct">تفصیلات کی تصدیق یا درستگی کریں</string>
+    <string name="near_north_station">نارتھ اسٹیشن کے قریب</string>
+    <string name="near_south_station">ساؤتھ اسٹیشن کے قریب</string>
+    <string name="number_of_boxes">باکسوں کی تعداد</string>
+    <string name="additional_info">اضافی معلومات</string>
+    <string name="confirm_request">درخواست کی تصدیق کریں</string>
+
+    <!-- Generic UI -->
+    <string name="please_confirm">براہ کرم تصدیق کریں</string>
+    <string name="yes">ہاں</string>
+    <string name="all_updates_synced">تمام اپڈیٹس ہم آہنگ</string>
+    <string name="something_went_wrong">کچھ غلط ہوا۔ براہ کرم دوبارہ کوشش کریں۔</string>
 </resources>

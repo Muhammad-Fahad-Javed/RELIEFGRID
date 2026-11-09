@@ -114,3 +114,22 @@ data class RunResultEntity(
     val avgHandoffMs: Long,
     val finishedAt: Long
 )
+
+/** Emergency and disaster incident report. */
+@Entity(tableName = "incidents")
+data class IncidentEntity(
+    @PrimaryKey val id: String,
+    val reporterName: String,
+    val category: String, // FLOOD, ROAD_BLOCKAGE, MEDICAL, TRAPPED, INFRASTRUCTURE, OTHER
+    val urgency: String,  // CRITICAL, HIGH, MEDIUM, LOW
+    val locationText: String,
+    val description: String,
+    val stationId: String, // NORTH or SOUTH
+    val status: String,    // REPORTED, VERIFIED, IN_PROGRESS, RESOLVED
+    val aiSummary: String? = null,
+    val verifiedBy: String? = null,
+    val x: Float = 0.5f,
+    val y: Float = 0.5f,
+    val createdAt: Long,
+    val resolvedAt: Long? = null
+)

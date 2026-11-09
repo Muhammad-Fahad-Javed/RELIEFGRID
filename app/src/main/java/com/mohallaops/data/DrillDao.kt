@@ -19,6 +19,7 @@ interface DrillDao {
     @Query("SELECT * FROM events ORDER BY ts DESC, id DESC") fun events(): Flow<List<EventEntity>>
     @Query("SELECT * FROM inventory_tx ORDER BY id DESC") fun inventoryTx(): Flow<List<InventoryTxEntity>>
     @Query("SELECT * FROM run_results ORDER BY runLabel") fun results(): Flow<List<RunResultEntity>>
+    @Query("SELECT * FROM incidents ORDER BY createdAt DESC") fun incidents(): Flow<List<IncidentEntity>>
 
     // ---- one-shot reads used inside transactions ----
     @Query("SELECT COUNT(*) FROM stations") suspend fun stationCount(): Int
@@ -53,6 +54,9 @@ interface DrillDao {
     @Query("SELECT * FROM deliveries WHERE status='CONFIRMED' AND deliveredAt IS NOT NULL")
     suspend fun confirmedDeliveries(): List<DeliveryEntity>
     @Query("SELECT * FROM events ORDER BY ts, id") suspend fun eventsNow(): List<EventEntity>
+    @Query("SELECT * FROM incidents WHERE id=:id") suspend fun getIncident(id: String): IncidentEntity?
+    @Query("SELECT * FROM incidents WHERE status != 'RESOLVED' ORDER BY createdAt DESC") suspend fun activeIncidents(): List<IncidentEntity>
+    @Query("SELECT COUNT(*) FROM incidents WHERE status != 'RESOLVED'") suspend fun activeIncidentCount(): Int
 
     // ---- writes ----
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertStations(v: List<StationEntity>)
@@ -62,6 +66,8 @@ interface DrillDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertRoad(v: RoadEntity)
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertRequest(v: RequestEntity)
     @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertDelivery(v: DeliveryEntity)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertIncident(v: IncidentEntity)
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertIncidents(v: List<IncidentEntity>)
     @Insert suspend fun insertTx(v: InventoryTxEntity)
     /** Returns -1 when an event with the same eventUid already exists (duplicate detection). */
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertEvent(v: EventEntity): Long
@@ -91,6 +97,10 @@ interface DrillDao {
     @Query("UPDATE volunteers SET completed=completed+1 WHERE id=:id") suspend fun incrementCompleted(id: String)
     @Query("UPDATE roads SET open=:open WHERE id=:id") suspend fun setRoadOpen(id: String, open: Boolean)
     @Query("UPDATE events SET syncStatus='SYNCED' WHERE syncStatus='WAITING'") suspend fun markAllSynced(): Int
+    @Query("UPDATE incidents SET status=:status, verifiedBy=:verifiedBy WHERE id=:id")
+    suspend fun updateIncidentStatus(id: String, status: String, verifiedBy: String?)
+    @Query("UPDATE incidents SET status='RESOLVED', resolvedAt=:ts WHERE id=:id")
+    suspend fun resolveIncident(id: String, ts: Long)
 
     @Query("DELETE FROM stations") suspend fun clearStations()
     @Query("DELETE FROM boxes") suspend fun clearBoxes()
@@ -101,4 +111,5 @@ interface DrillDao {
     @Query("DELETE FROM roads") suspend fun clearRoads()
     @Query("DELETE FROM inventory_tx") suspend fun clearTx()
     @Query("DELETE FROM events") suspend fun clearEvents()
+    @Query("DELETE FROM incidents") suspend fun clearIncidents()
 }

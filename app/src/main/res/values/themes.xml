@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base theme: Compose handles most theming; this XML theme just sets system bars
+         and disables the platform ActionBar so Compose Scaffold can own the chrome. -->
     <style name="Theme.MohallaOps" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">#F7F9FC</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">#FFFFFF</item>
+        <item name="android:windowBackground">#F7F9FC</item>
+    </style>
+
+    <!-- Splash theme applied before Compose content loads, preventing a white flash. -->
+    <style name="Theme.MohallaOps.Splash" parent="Theme.MohallaOps">
+        <item name="android:statusBarColor">#142B45</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:navigationBarColor">#142B45</item>
+        <item name="android:windowBackground">#142B45</item>
     </style>
 </resources>

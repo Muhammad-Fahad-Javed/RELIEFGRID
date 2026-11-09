@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -44,8 +45,9 @@ import com.mohallaops.ui.components.Tone
 import com.mohallaops.ui.theme.MohallaColors
 
 /**
- * Simulated neighborhood map drawn from the scenario data (no GPS or Maps key needed).
- * Stations, families, the connecting road and active delivery routes all come from the database.
+ * RELIEFGRID Neighborhood Map.
+ * Renders stations, families, road condition, active deliveries,
+ * and reported disaster incidents on a real-time reactive canvas.
  */
 @Composable
 fun MapScreen(vm: MainViewModel) {
@@ -54,13 +56,16 @@ fun MapScreen(vm: MainViewModel) {
     val boxes by vm.boxes.collectAsStateWithLifecycle()
     val roads by vm.roads.collectAsStateWithLifecycle()
     val deliveries by vm.deliveries.collectAsStateWithLifecycle()
+    val incidents by vm.incidents.collectAsStateWithLifecycle()
     var selected by remember { mutableStateOf<String?>(null) }
     val roadOpen = roads.firstOrNull()?.open ?: true
+    val activeIncidents = incidents.filter { it.status != S.INC_RESOLVED }
 
     Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Neighborhood map", style = MaterialTheme.typography.titleLarge, color = MohallaColors.Navy)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             StatusBadge(if (roadOpen) "Road open" else "Road CLOSED", if (roadOpen) Tone.SUCCESS else Tone.DANGER)
+            StatusBadge("${activeIncidents.size} active incidents", if (activeIncidents.isNotEmpty()) Tone.WARNING else Tone.SUCCESS)
             StatusBadge("Simulated map", Tone.NEUTRAL)
         }
 
@@ -74,11 +79,13 @@ fun MapScreen(vm: MainViewModel) {
             Canvas(Modifier.fillMaxSize()) {
                 fun pt(x: Float, y: Float) = Offset(size.width * x, size.height * y)
                 val byId = stations.associateBy { it.id }
+
                 // spokes from each station to its families
                 families.forEach { f ->
                     val st = byId[f.homeStationId] ?: return@forEach
                     drawLine(MohallaColors.Border, pt(st.x, st.y), pt(f.x, f.y), strokeWidth = 3f)
                 }
+
                 // active delivery routes (assigned but not yet confirmed)
                 deliveries.filter { it.status != S.CONFIRMED && it.status != S.DECLINED && it.status != S.FAILED }.forEach { d ->
                     val st = byId[d.stationId]; val f = families.firstOrNull { it.id == d.familyId }
@@ -89,6 +96,7 @@ fun MapScreen(vm: MainViewModel) {
                         )
                     }
                 }
+
                 // connecting road
                 val n = byId["NORTH"]; val s = byId["SOUTH"]
                 if (n != null && s != null) {
@@ -105,6 +113,7 @@ fun MapScreen(vm: MainViewModel) {
                 StatusBadge(if (roadOpen) "Road open" else "Road closed ✕", if (roadOpen) Tone.SUCCESS else Tone.DANGER)
             }
 
+            // Stations
             stations.forEach { st ->
                 val count = boxes.count { it.ownerStationId == st.id && it.status == S.AVAILABLE }
                 Column(
@@ -119,6 +128,8 @@ fun MapScreen(vm: MainViewModel) {
                     Text("$count box(es)", color = Color.White, style = MaterialTheme.typography.labelMedium)
                 }
             }
+
+            // Families
             families.forEach { f ->
                 val served = f.status == S.SERVED
                 Column(
@@ -134,19 +145,38 @@ fun MapScreen(vm: MainViewModel) {
                     Text(if (served) "✓ served" else "… waiting", style = MaterialTheme.typography.labelMedium, color = if (served) MohallaColors.Success else MohallaColors.Warning)
                 }
             }
+
+            // Active Incident Pins on Map
+            activeIncidents.forEach { inc ->
+                val incColor = if (inc.urgency == S.URGENCY_CRITICAL) MohallaColors.Danger else MohallaColors.Warning
+                Box(
+                    Modifier.offset(x = w * inc.x - 14.dp, y = h * inc.y - 14.dp)
+                        .size(28.dp)
+                        .background(incColor, CircleShape)
+                        .border(BorderStroke(2.dp, Color.White), CircleShape)
+                        .clickable { selected = inc.id },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("!", color = Color.White, style = MaterialTheme.typography.labelLarge)
+                }
+            }
         }
 
         Text(
-            "Tap a station or family. Dashed teal lines are deliveries in progress.",
+            "Tap a station, family, or incident (!) icon to view details. Dashed teal lines represent active deliveries.",
             style = MaterialTheme.typography.bodyMedium, color = MohallaColors.TextSecondary
         )
 
+        // Selected station card
         val st = stations.firstOrNull { it.id == selected }
         val fam = families.firstOrNull { it.id == selected }
+        val inc = incidents.firstOrNull { it.id == selected }
+
         if (st != null) {
             val owned = boxes.filter { it.ownerStationId == st.id }
             AppCard {
                 Text(st.name, style = MaterialTheme.typography.titleMedium)
+                Text("Lead: ${st.leadName}", style = MaterialTheme.typography.bodyMedium, color = MohallaColors.TextSecondary)
                 Text(
                     "Available ${owned.count { it.status == S.AVAILABLE }} · Reserved/in transit ${owned.count { it.status == S.RESERVED || it.status == S.PICKED_UP }} · Delivered ${owned.count { it.status == S.DELIVERED }}",
                     style = MaterialTheme.typography.bodyMedium
@@ -159,6 +189,19 @@ fun MapScreen(vm: MainViewModel) {
                 Text(fam.label, style = MaterialTheme.typography.titleMedium)
                 StatusBadge(if (fam.status == S.SERVED) "Served — receipt confirmed" else "Waiting", if (fam.status == S.SERVED) Tone.SUCCESS else Tone.WARNING)
                 Text(d?.let { "Delivery ${it.id}: ${deliveryLabel(it.status)}" } ?: "No delivery yet", style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+        if (inc != null) {
+            AppCard {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Incident: ${inc.id} (${inc.category})", style = MaterialTheme.typography.titleMedium)
+                    StatusBadge(inc.urgency, if (inc.urgency == S.URGENCY_CRITICAL) Tone.DANGER else Tone.WARNING)
+                }
+                Text("Location: ${inc.locationText}", style = MaterialTheme.typography.bodyMedium, color = MohallaColors.Navy)
+                Text(inc.description, style = MaterialTheme.typography.bodyMedium)
+                inc.aiSummary?.let {
+                    Text("AI Triage: $it", style = MaterialTheme.typography.bodyMedium, color = MohallaColors.Teal)
+                }
             }
         }
     }

@@ -38,6 +38,7 @@ class DrillRepository(
     val events = dao.events()
     val inventoryTx = dao.inventoryTx()
     val results = dao.results()
+    val incidents = dao.incidents()
 
     // ------------------------------------------------------------------ helpers
 
@@ -71,7 +72,7 @@ class DrillRepository(
     suspend fun ensureSeeded() {
         if (dao.stationCount() == 0) db.withTransaction {
             seed()
-            log("DRILL_CREATED", "System", "Demo drill created: 6 families, North 5 boxes, South 1 box")
+            log("DRILL_CREATED", "System", "RELIEFGRID drill initialized: 6 families, 2 stations, 2 reported incidents")
         }
     }
 
@@ -104,6 +105,42 @@ class DrillRepository(
                 VolunteerEntity("VOL-C", "Volunteer C", "SOUTH", true, 0)
             )
         )
+        dao.insertIncidents(
+            listOf(
+                IncidentEntity(
+                    id = "INC-001",
+                    reporterName = "Resident (South family 1)",
+                    category = S.CAT_ROAD,
+                    urgency = S.URGENCY_HIGH,
+                    locationText = "Midpoint culvert between North and South",
+                    description = "Waterlogging observed over bridge. Water level rising rapidly.",
+                    stationId = "NORTH",
+                    status = S.INC_REPORTED,
+                    aiSummary = "Road NS bridge at risk of closure. Recommend immediate supply rebalancing.",
+                    verifiedBy = null,
+                    x = 0.5f,
+                    y = 0.45f,
+                    createdAt = clock() - 300_000,
+                    resolvedAt = null
+                ),
+                IncidentEntity(
+                    id = "INC-002",
+                    reporterName = "Volunteer B",
+                    category = S.CAT_TRAPPED,
+                    urgency = S.URGENCY_CRITICAL,
+                    locationText = "Sector 4 low-lying area near South Station",
+                    description = "Elderly residents stranded on high ground due to water overflow.",
+                    stationId = "SOUTH",
+                    status = S.INC_REPORTED,
+                    aiSummary = "Priority rescue: dispatch volunteer and prioritize relief pack delivery.",
+                    verifiedBy = null,
+                    x = 0.4f,
+                    y = 0.72f,
+                    createdAt = clock() - 150_000,
+                    resolvedAt = null
+                )
+            )
+        )
     }
 
     /** Restores the exact starting scenario. Recorded run results are kept for comparison. */
@@ -112,13 +149,14 @@ class DrillRepository(
         db.withTransaction {
             dao.clearDeliveriesAndRequestsEtc()
             seed()
-            log("DRILL_RESET", actor.name, "Drill reset to the starting scenario")
+            log("DRILL_RESET", actor.name, "Drill reset to starting scenario")
         }
     }
 
     private suspend fun DrillDao.clearDeliveriesAndRequestsEtc() {
         clearDeliveries(); clearRequests(); clearBoxes(); clearFamilies()
         clearStations(); clearVolunteers(); clearRoads(); clearTx(); clearEvents()
+        clearIncidents()
     }
 
     // ------------------------------------------------------------------ disruptions
@@ -327,6 +365,60 @@ class DrillRepository(
         dao.setRequestStatus(d.requestId, S.REQ_DELIVERED)
         d.volunteerId?.let { dao.incrementCompleted(it) }
         log("DELIVERY_CONFIRMED", actor.name, "${d.familyId} confirmed receipt of ${d.boxIds}", d.stationId)
+    }
+
+    // ------------------------------------------------------------------ incidents
+
+    suspend fun reportIncident(
+        actor: Actor,
+        category: String,
+        urgency: String,
+        locationText: String,
+        description: String,
+        stationId: String,
+        aiSummary: String? = null
+    ): String {
+        rule(locationText.isNotBlank(), "Location details are required")
+        rule(description.isNotBlank(), "Incident description is required")
+        rule(description.length <= 1000, "Description is too long")
+        return db.withTransaction {
+            val id = "INC-" + UUID.randomUUID().toString().take(6).uppercase()
+            val incident = IncidentEntity(
+                id = id,
+                reporterName = actor.name,
+                category = category,
+                urgency = urgency,
+                locationText = locationText.take(200),
+                description = description.take(1000),
+                stationId = stationId,
+                status = S.INC_REPORTED,
+                aiSummary = aiSummary,
+                verifiedBy = null,
+                createdAt = clock(),
+                resolvedAt = null
+            )
+            dao.insertIncident(incident)
+            log("INCIDENT_REPORTED", actor.name, "Emergency: $category ($urgency) at $locationText ($id)", stationId)
+            id
+        }
+    }
+
+    suspend fun verifyIncident(actor: Actor, incidentId: String) {
+        need(isLeader(actor) || actor.role == Role.STATION_LEAD, "Only leads can verify incidents")
+        db.withTransaction {
+            val inc = dao.getIncident(incidentId); rule(inc != null, "Incident not found")
+            dao.updateIncidentStatus(incidentId, S.INC_VERIFIED, actor.name)
+            log("INCIDENT_VERIFIED", actor.name, "Incident $incidentId verified by ${actor.name}", inc!!.stationId)
+        }
+    }
+
+    suspend fun resolveIncident(actor: Actor, incidentId: String) {
+        need(isLeader(actor) || actor.role == Role.STATION_LEAD || actor.role == Role.VOLUNTEER, "Not authorized to resolve incident")
+        db.withTransaction {
+            val inc = dao.getIncident(incidentId); rule(inc != null, "Incident not found")
+            dao.resolveIncident(incidentId, clock())
+            log("INCIDENT_RESOLVED", actor.name, "Incident $incidentId resolved by ${actor.name}", inc!!.stationId)
+        }
     }
 
     // ------------------------------------------------------------------ run automation (demo)

@@ -22,6 +22,7 @@ import com.mohallaops.ui.components.AppCard
 import com.mohallaops.ui.components.EmptyState
 import com.mohallaops.ui.components.OfflineBanner
 import com.mohallaops.ui.components.SecondaryButton
+import com.mohallaops.ui.components.SectionHeader
 import com.mohallaops.ui.components.StatusBadge
 import com.mohallaops.ui.components.Tone
 import com.mohallaops.ui.theme.MohallaColors
@@ -30,56 +31,132 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/** Event type to display tone mapping for the activity timeline. */
+private fun eventTone(type: String): Tone = when {
+    type.contains("CONFIRMED") || type.contains("SERVED") || type.contains("SYNCED") -> Tone.SUCCESS
+    type.contains("REJECTED") || type.contains("DECLINED") || type.contains("FAILED") -> Tone.DANGER
+    type.contains("RESET") -> Tone.WARNING
+    type.contains("TRANSFER") || type.contains("ASSIGNED") -> Tone.INFO
+    else -> Tone.NEUTRAL
+}
+
 @Composable
 fun ActivityScreen(vm: MainViewModel) {
     val events by vm.events.collectAsStateWithLifecycle()
     val offline by vm.offline.collectAsStateWithLifecycle()
     val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
-    val fmt = SimpleDateFormat("HH:mm:ss", Locale.US)
+    val timeFmt = SimpleDateFormat("HH:mm:ss", Locale.US)
+    val dateFmt = SimpleDateFormat("MMM d", Locale.US)
     val waiting = events.count { it.syncStatus == S.SYNC_WAITING }
+    val synced = events.count { it.syncStatus == S.SYNCED }
 
-    LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
         item {
-            Text("Activity timeline", style = MaterialTheme.typography.titleLarge, color = MohallaColors.Navy)
+            Text(
+                "Activity timeline",
+                style = MaterialTheme.typography.titleLarge,
+                color = MohallaColors.Navy
+            )
+            Text(
+                "${events.size} event(s) · $synced synced · $waiting queued",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MohallaColors.TextSecondary
+            )
         }
+
+        // Sync & exchange controls
         item {
             AppCard {
                 OfflineBanner(offline, waiting)
                 Text(
-                    "Phone-to-phone exchange: copy this device's updates, send them to another phone (message or any share method), and import them there. Duplicates are detected and ignored.",
-                    style = MaterialTheme.typography.bodyMedium, color = MohallaColors.TextSecondary
+                    "Phone-to-phone exchange: copy this device's events log, " +
+                    "send it to another phone (via message, share, or any method), " +
+                    "and import there. Duplicates are detected and skipped automatically.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MohallaColors.TextSecondary
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SecondaryButton("Copy updates", {
-                        scope.launch {
-                            clipboard.setText(AnnotatedString(vm.exportEvents()))
-                            vm.toast("Updates copied")
-                        }
-                    }, Modifier.weight(1f))
-                    SecondaryButton("Import updates", {
-                        val text = clipboard.getText()?.text
-                        if (text.isNullOrBlank()) vm.toast("Clipboard is empty") else vm.importEvents(text)
-                    }, Modifier.weight(1f))
+                    SecondaryButton(
+                        "Copy updates",
+                        {
+                            scope.launch {
+                                clipboard.setText(AnnotatedString(vm.exportEvents()))
+                                vm.toast("Updates copied to clipboard (${events.size} events)")
+                            }
+                        },
+                        Modifier.weight(1f)
+                    )
+                    SecondaryButton(
+                        "Import updates",
+                        {
+                            val text = clipboard.getText()?.text
+                            if (text.isNullOrBlank()) vm.toast("Clipboard is empty")
+                            else vm.importEvents(text)
+                        },
+                        Modifier.weight(1f)
+                    )
                 }
-                SecondaryButton("Sync now", { vm.syncNow() }, Modifier.fillMaxWidth(), enabled = waiting > 0)
+                SecondaryButton(
+                    "Sync now",
+                    { vm.syncNow() },
+                    Modifier.fillMaxWidth(),
+                    enabled = waiting > 0 && !offline
+                )
+                Text(
+                    "Note: \"Sync now\" marks queued events as synced locally. " +
+                    "No cloud backend is configured in this build (see README).",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MohallaColors.TextSecondary
+                )
             }
         }
-        if (events.isEmpty()) item { EmptyState("No activity yet", "Actions in the drill appear here in order.") }
+
+        // Event list section header
+        if (events.isNotEmpty()) {
+            item { SectionHeader("Events (newest first)") }
+        }
+
+        if (events.isEmpty()) {
+            item {
+                EmptyState(
+                    "No activity yet",
+                    "Actions in the drill appear here in order. " +
+                    "Start by running a demo or manually walking through the request workflow."
+                )
+            }
+        }
+
         items(events, key = { it.id }) { e ->
             AppCard {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(fmt.format(Date(e.ts)), style = MaterialTheme.typography.labelLarge, color = MohallaColors.TextSecondary)
+                    Text(
+                        "${dateFmt.format(Date(e.ts))} ${timeFmt.format(Date(e.ts))}",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MohallaColors.TextSecondary
+                    )
                     StatusBadge(
-                        if (e.syncStatus == S.SYNCED) "Synced" else "Waiting to sync",
+                        if (e.syncStatus == S.SYNCED) "Synced" else "Queued",
                         if (e.syncStatus == S.SYNCED) Tone.SUCCESS else Tone.WARNING
                     )
                 }
-                Text(e.type.replace('_', ' '), style = MaterialTheme.typography.titleMedium)
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    StatusBadge(
+                        e.type.replace('_', ' '),
+                        eventTone(e.type)
+                    )
+                }
                 Text(e.message, style = MaterialTheme.typography.bodyMedium)
                 Text(
                     "By ${e.actor}" + (e.stationId?.let { " · $it" } ?: ""),
-                    style = MaterialTheme.typography.labelMedium, color = MohallaColors.TextSecondary
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MohallaColors.TextSecondary
                 )
             }
         }

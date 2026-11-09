@@ -2,11 +2,12 @@ package com.mohallaops.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -34,6 +35,9 @@ import com.mohallaops.R
 import com.mohallaops.ui.screens.ActivityScreen
 import com.mohallaops.ui.screens.DrillScreen
 import com.mohallaops.ui.screens.HomeScreen
+import com.mohallaops.ui.screens.IncidentSheet
+import com.mohallaops.ui.screens.IncidentsScreen
+import com.mohallaops.ui.screens.InventoryScreen
 import com.mohallaops.ui.screens.MapScreen
 import com.mohallaops.ui.screens.RequestSheet
 import com.mohallaops.ui.screens.ResultsScreen
@@ -44,10 +48,11 @@ private data class Tab(val route: String, val label: Int, val icon: ImageVector)
 
 private val tabs = listOf(
     Tab("home", R.string.nav_home, Icons.Filled.Home),
-    Tab("stations", R.string.nav_stations, Icons.Filled.Menu),
-    Tab("drill", R.string.nav_drill, Icons.Filled.Settings),
-    Tab("map", R.string.nav_map, Icons.Filled.Place),
-    Tab("activity", R.string.nav_activity, Icons.Filled.Info)
+    Tab("incidents", R.string.nav_incidents, Icons.Filled.Warning),
+    Tab("stations", R.string.nav_stations, Icons.Filled.LocationOn),
+    Tab("drill", R.string.nav_drill, Icons.Filled.Assignment),
+    Tab("map", R.string.nav_map, Icons.Filled.Map),
+    Tab("activity", R.string.nav_activity, Icons.Filled.Timeline)
 )
 
 @Composable
@@ -56,6 +61,7 @@ fun AppRoot(vm: MainViewModel) {
     val snack = remember { SnackbarHostState() }
     val message by vm.message.collectAsStateWithLifecycle()
     var showRequest by remember { mutableStateOf(false) }
+    var showIncidentSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(message) {
         message?.let {
@@ -99,6 +105,7 @@ fun AppRoot(vm: MainViewModel) {
                 HomeScreen(
                     vm,
                     onNewRequest = { showRequest = true },
+                    onNewIncident = { showIncidentSheet = true },
                     onOpen = { dest ->
                         nav.navigate(dest) {
                             popUpTo(nav.graph.findStartDestination().id) { saveState = true }
@@ -108,13 +115,18 @@ fun AppRoot(vm: MainViewModel) {
                     }
                 )
             }
+            composable("incidents") {
+                IncidentsScreen(vm, onNewIncident = { showIncidentSheet = true })
+            }
             composable("stations") { StationsScreen(vm, onNewRequest = { showRequest = true }) }
             composable("drill") { DrillScreen(vm, onResults = { nav.navigate("results") }) }
             composable("map") { MapScreen(vm) }
             composable("activity") { ActivityScreen(vm) }
+            composable("inventory") { InventoryScreen(vm) }
             composable("results") { ResultsScreen(vm) }
         }
     }
 
     if (showRequest) RequestSheet(vm) { showRequest = false }
+    if (showIncidentSheet) IncidentSheet(vm) { showIncidentSheet = false }
 }

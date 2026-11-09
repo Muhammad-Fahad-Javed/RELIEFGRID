@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Backup rules for RELIEFGRID.
+    The Room database (mohalla_ops.db) contains only drill simulation data.
+    We back up SharedPreferences (onboarding flag) but exclude the database
+    since it re-seeds on first launch.
+-->
+<full-backup-content>
+    <include domain="sharedpref" path="mohalla_prefs.xml" />
+    <exclude domain="database" path="mohalla_ops.db" />
+    <exclude domain="database" path="mohalla_ops.db-wal" />
+    <exclude domain="database" path="mohalla_ops.db-shm" />
+</full-backup-content>

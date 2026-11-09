@@ -1,20 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Mohalla Ops</string>
-    <string name="tagline">Practice today. Respond better tomorrow.</string>
+    <!-- App identity -->
+    <string name="app_name">RELIEFGRID</string>
+    <string name="tagline">Coordinate relief. Save lives.</string>
+    <string name="app_full_name">RELIEFGRID — Disaster Relief Coordination</string>
+    <string name="practice_disclaimer">Practice drill — simulated data, not a live emergency system</string>
+
+    <!-- Navigation labels -->
     <string name="nav_home">Home</string>
     <string name="nav_stations">Stations</string>
     <string name="nav_drill">Drill</string>
     <string name="nav_map">Map</string>
+    <string name="nav_incidents">Incidents</string>
     <string name="nav_activity">Activity</string>
+    <string name="nav_inventory">Inventory</string>
+
+    <!-- Onboarding -->
     <string name="skip">Skip</string>
     <string name="next">Continue</string>
     <string name="get_started">Get started</string>
     <string name="ob1_title">Practice before emergencies</string>
-    <string name="ob1_body">Neighborhood drills show where a plan breaks, before a real flood does.</string>
+    <string name="ob1_body">Neighborhood relief drills reveal where a plan breaks — before a real disaster does. RELIEFGRID keeps everyone coordinated.</string>
     <string name="ob2_title">Coordinate supplies and volunteers</string>
-    <string name="ob2_body">Residents, station leads, volunteers and the drill leader each have their own responsibilities.</string>
+    <string name="ob2_body">Residents, station leads, volunteers and the drill leader each have clear responsibilities enforced by the app.</string>
     <string name="ob3_title">Discover a better plan</string>
-    <string name="ob3_body">Compare two runs of the same scenario and see which plan serves more families.</string>
+    <string name="ob3_body">Compare two runs of the same scenario and see which plan serves more families. The numbers come from real recorded actions.</string>
+
+    <!-- Home screen -->
     <string name="demo_banner">Practice drill — simulated data, not an emergency system</string>
+    <string name="demo_account_label">Demo account</string>
+    <string name="drill_active">Drill active</string>
+    <string name="continue_drill">Continue drill</string>
+    <string name="quick_actions">Quick actions</string>
+    <string name="request_supplies">Request supplies</string>
+    <string name="track_my_request">Track my request</string>
+    <string name="run_or_reset_drill">Run or reset the drill</string>
+    <string name="see_neighborhood_map">See neighborhood map</string>
+
+    <!-- Stations screen -->
+    <string name="my_requests">My requests</string>
+    <string name="my_deliveries">My deliveries</string>
+    <string name="my_station">My station</string>
+    <string name="all_stations">All stations</string>
+    <string name="signed_in_as">Signed in as %s</string>
+    <string name="no_requests">No requests</string>
+    <string name="no_requests_body">Requests for this station appear here.</string>
+    <string name="no_request_yet">No request yet</string>
+    <string name="no_request_yet_body">Tap "Request supplies" to send one in Urdu or English.</string>
+    <string name="assignments">Assignments</string>
+    <string name="nothing_assigned">Nothing assigned</string>
+    <string name="nothing_assigned_body">Deliveries assigned to you appear here.</string>
+    <string name="approve">Approve</string>
+    <string name="reject">Reject</string>
+    <string name="assign_delivery">Assign delivery</string>
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
+    <string name="enter_box_id_pickup">Enter box ID &amp; pick up</string>
+    <string name="record_handoff">Record handoff</string>
+    <string name="confirm_receipt">Confirm I received it</string>
+    <string name="reassign_volunteer">Choose replacement volunteer</string>
+    <string name="confirm_pickup">Confirm pickup</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+
+    <!-- Request sheet -->
+    <string name="request_supplies_title">Request supplies</string>
+    <string name="switch_to_resident">Switch to the Resident demo account to submit</string>
+    <string name="message_placeholder">Your message (Urdu or English)</string>
+    <string name="urdu_voice">Urdu voice</string>
+    <string name="english_voice">English voice</string>
+    <string name="speak_request">Speak your request</string>
+    <string name="voice_disclaimer">Voice uses your phone\'s speech recognition. Always check the text before continuing — it can make mistakes.</string>
+    <string name="analyse_message">Analyse message</string>
+    <string name="analysing">Analysing…</string>
+    <string name="confirm_or_correct">Confirm or correct the details</string>
+    <string name="near_north_station">Near North Station</string>
+    <string name="near_south_station">Near South Station</string>
+    <string name="number_of_boxes">Number of boxes</string>
+    <string name="additional_info">Additional information</string>
+    <string name="confirm_request">Confirm request</string>
+
+    <!-- Drill screen -->
+    <string name="drill_control">Drill control</string>
+    <string name="drill_leader_only">Only the Drill Leader can change the drill. Switch account on Home.</string>
+    <string name="automatic_demo_runs">Automatic demo runs</string>
+    <string name="demo_run_description">Each run resets to the same starting scenario (North 5 boxes / 2 families, South 1 box / 4 families), closes the same road, then serves every family it can.</string>
+    <string name="run1_label">Run 1 — no transfer</string>
+    <string name="run2_label">Run 2 — move 3 boxes North → South first</string>
+    <string name="compare_results">Compare results</string>
+    <string name="ai_planning_assistant">AI planning assistant</string>
+    <string name="no_shortfall">No shortfall detected: every waiting family has a box at its own station.</string>
+    <string name="suggestion_dismissed">Suggestion dismissed.</string>
+    <string name="show_again">Show again</string>
+    <string name="disruptions_simulated">Disruptions (simulated)</string>
+    <string name="road_north_south">Road North–South</string>
+    <string name="road_open">Open</string>
+    <string name="road_closed">Closed</string>
+    <string name="close_road">Close road</string>
+    <string name="reopen_road">Reopen road</string>
+    <string name="internet_disconnected">Internet disconnected</string>
+    <string name="drill_conditions_note">These are drill conditions only; nothing here affects real roads or services.</string>
+    <string name="manual_steps">Manual steps</string>
+    <string name="transfer_boxes_north_south">Transfer 3 boxes North → South</string>
+    <string name="serve_all_families">Serve every family possible</string>
+    <string name="record_as_run1">Record as Run 1</string>
+    <string name="record_as_run2">Record as Run 2</string>
+    <string name="reset_drill">Reset drill</string>
+    <string name="volunteers">Volunteers</string>
+
+    <!-- Map screen -->
+    <string name="neighborhood_map">Neighborhood map</string>
+    <string name="simulated_map">Simulated map</string>
+    <string name="map_tap_hint">Tap a station or family. Dashed teal lines are deliveries in progress.</string>
+
+    <!-- Activity screen -->
+    <string name="activity_timeline">Activity timeline</string>
+    <string name="phone_exchange_description">Phone-to-phone exchange: copy this device\'s updates, send them to another phone (message or any share method), and import them there. Duplicates are detected and ignored.</string>
+    <string name="copy_updates">Copy updates</string>
+    <string name="import_updates">Import updates</string>
+    <string name="sync_now">Sync now</string>
+    <string name="no_activity">No activity yet</string>
+    <string name="no_activity_body">Actions in the drill appear here in order.</string>
+
+    <!-- Results screen -->
+    <string name="drill_results">Drill results</string>
+    <string name="current_drill_status">Current drill: %1$d of %2$d families served (confirmed receipts only).</string>
+    <string name="metric_label">Metric</string>
+    <string name="first_run">First run</string>
+    <string name="improved_run">Improved run</string>
+    <string name="measured_findings">Measured findings</string>
+    <string name="record_both_runs">Record both runs to see a before/after comparison.</string>
+    <string name="results_disclaimer">\"Example values\" come from the scenario description, not from a run. Press a Demo Run on the Drill tab to record real values.</string>
+
+    <!-- Inventory screen -->
+    <string name="inventory_history">Inventory history</string>
+    <string name="no_inventory_tx">No transactions yet</string>
+    <string name="no_inventory_tx_body">Box movements and deliveries appear here as they happen.</string>
+
+    <!-- Generic UI -->
+    <string name="please_confirm">Please confirm</string>
+    <string name="yes">Yes</string>
+    <string name="ai_suggestion_disclaimer">Counts come from stored records (deterministic). This is practice guidance, not an emergency instruction.</string>
+    <string name="supporting_data">Supporting data</string>
+    <string name="suggested_action">Suggested action</string>
+    <string name="expected_effect">Expected effect</string>
+    <string name="limitations">Limitations</string>
+    <string name="accept_suggestion">Accept</string>
+    <string name="reject_suggestion">Reject</string>
+    <string name="all_updates_synced">All updates synced</string>
+    <string name="offline_mode_on">Offline mode on — new updates will queue</string>
+    <string name="back_online">Back online</string>
+    <string name="speech_unavailable">Speech recognition is not available on this device. Please type your request.</string>
+    <string name="updates_copied">Updates copied</string>
+    <string name="clipboard_empty">Clipboard is empty</string>
+    <string name="something_went_wrong">Something went wrong. Please try again.</string>
 </resources>

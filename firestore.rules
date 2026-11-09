@@ -1,0 +1,103 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for user identity & roles
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isLeader() {
+      return isSignedIn() && (request.auth.token.role == 'DRILL_LEADER' || request.auth.token.admin == true);
+    }
+
+    function isStationLead(stationId) {
+      return isLeader() || (isSignedIn() && request.auth.token.role == 'STATION_LEAD' && request.auth.token.stationId == stationId);
+    }
+
+    function isVolunteer() {
+      return isSignedIn() && request.auth.token.role == 'VOLUNTEER';
+    }
+
+    // Stations collection: public read, only leader or admin write
+    match /stations/{stationId} {
+      allow read: if true;
+      allow write: if isLeader();
+    }
+
+    // Supply Boxes: public read, leads can update status/owner of their station boxes
+    match /boxes/{boxId} {
+      allow read: if true;
+      allow create: if isLeader();
+      allow update: if isLeader() || (isSignedIn() && (
+        resource.data.ownerStationId == request.auth.token.stationId ||
+        request.resource.data.ownerStationId == request.auth.token.stationId
+      ));
+      allow delete: if isLeader();
+    }
+
+    // Families: read by all authenticated, modified by leads or drill leader
+    match /families/{familyId} {
+      allow read: if true;
+      allow write: if isLeader() || (isSignedIn() && request.auth.token.familyId == familyId);
+    }
+
+    // Requests: residents create for themselves, station leads approve/assign
+    match /requests/{requestId} {
+      allow read: if true;
+      allow create: if isLeader() || (isSignedIn() && (
+        request.resource.data.quantity >= 1 &&
+        request.resource.data.quantity <= 10 &&
+        request.resource.data.rawText.size() <= 1000
+      ));
+      allow update: if isLeader() || isStationLead(resource.data.stationId);
+      allow delete: if isLeader();
+    }
+
+    // Deliveries: managed by station leads and assigned volunteers
+    match /deliveries/{deliveryId} {
+      allow read: if true;
+      allow create: if isLeader() || isStationLead(request.resource.data.stationId);
+      allow update: if isLeader() ||
+                      isStationLead(resource.data.stationId) ||
+                      (isVolunteer() && resource.data.volunteerId == request.auth.uid) ||
+                      (isSignedIn() && request.auth.token.familyId == resource.data.familyId);
+      allow delete: if isLeader();
+    }
+
+    // Incidents: reported by anyone (including anonymous/residents during disaster), verified by leads
+    match /incidents/{incidentId} {
+      allow read: if true;
+      allow create: if request.resource.data.description.size() <= 1000 &&
+                       request.resource.data.locationText.size() <= 200;
+      allow update: if isLeader() || isStationLead(resource.data.stationId) || isVolunteer();
+      allow delete: if isLeader();
+    }
+
+    // Events (Audit Log): immutable once written (append-only)
+    match /events/{eventId} {
+      allow read: if true;
+      allow create: if true; // allow client logging of events
+      allow update, delete: if false; // strictly immutable audit log
+    }
+
+    // Volunteers: read by all, profile updated by self or lead
+    match /volunteers/{volunteerId} {
+      allow read: if true;
+      allow create, delete: if isLeader();
+      allow update: if isLeader() || (isSignedIn() && request.auth.uid == volunteerId);
+    }
+
+    // Roads: read by all, toggled only by leader
+    match /roads/{roadId} {
+      allow read: if true;
+      allow write: if isLeader();
+    }
+
+    // Run Results: read by all, created by drill leader
+    match /run_results/{runId} {
+      allow read: if true;
+      allow write: if isLeader();
+    }
+  }
+}

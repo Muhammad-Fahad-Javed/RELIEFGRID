@@ -14,11 +14,13 @@ functions/node_modules
 # Additional Android/Kotlin/IDE ignores
 *.class
 *.log
-*.jar
 *.aar
 *.ap_
 *.apk
 *.aab
+
+# Wrapper jar should NOT be ignored
+!gradle/wrapper/gradle-wrapper.jar
 
 # Kotlin
 .kotlin/

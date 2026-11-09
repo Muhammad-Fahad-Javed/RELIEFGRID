@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.mohallaops.MohallaApp
 import com.mohallaops.ai.Extraction
+import com.mohallaops.ai.IncidentClassification
 import com.mohallaops.data.ImportResult
 import com.mohallaops.domain.Actor
 import com.mohallaops.domain.DemoActors
@@ -34,6 +35,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val events = repo.events.state()
     val inventoryTx = repo.inventoryTx.state()
     val results = repo.results.state()
+    val incidents = repo.incidents.state()
     val offline = repo.offline
 
     private val _actor = MutableStateFlow(DemoActors.leader)
@@ -78,6 +80,34 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             repo.submitRequest(actor.value, familyId, stationId, qty, raw, language, confidence)
             onDone()
         }
+    }
+
+    // ---- disaster incident flow ----
+    fun triageIncident(text: String, onResult: (IncidentClassification) -> Unit) {
+        viewModelScope.launch { onResult(mohalla.triageService.triage(text)) }
+    }
+
+    fun reportIncident(
+        category: String,
+        urgency: String,
+        locationText: String,
+        description: String,
+        stationId: String,
+        aiSummary: String? = null,
+        onDone: () -> Unit
+    ) {
+        act("Incident reported successfully") {
+            repo.reportIncident(actor.value, category, urgency, locationText, description, stationId, aiSummary)
+            onDone()
+        }
+    }
+
+    fun verifyIncident(id: String) = act("Incident verified") {
+        repo.verifyIncident(actor.value, id)
+    }
+
+    fun resolveIncident(id: String) = act("Incident marked as resolved") {
+        repo.resolveIncident(actor.value, id)
     }
 
     // ---- station / delivery actions ----

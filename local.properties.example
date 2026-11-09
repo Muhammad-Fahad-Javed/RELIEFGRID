@@ -1,0 +1,10 @@
+## This file is an example template for local.properties.
+## To build locally, create a `local.properties` file in this directory and set your Android SDK path:
+##
+## Windows:
+## sdk.dir=C\:\\Users\\<YourUsername>\\AppData\\Local\\Android\\Sdk
+##
+## macOS / Linux:
+## sdk.dir=/Users/<YourUsername>/Library/Android/sdk
+## or
+## sdk.dir=/home/<YourUsername>/Android/Sdk
