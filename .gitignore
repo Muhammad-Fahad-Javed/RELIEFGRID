@@ -1,0 +1,52 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/app/build
+/captures
+.externalNativeBuild
+.cxx
+google-services.json
+functions/node_modules
+
+# Additional Android/Kotlin/IDE ignores
+*.class
+*.log
+*.jar
+*.aar
+*.ap_
+*.apk
+*.aab
+
+# Kotlin
+.kotlin/
+
+# Local configuration
+local.properties
+keystore.properties
+*.keystore
+*.jks
+
+# IntelliJ / Android Studio
+*.iws
+out/
+.idea/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/caches
+.idea/modules.xml
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Node (Firebase functions)
+node_modules/
+functions/node_modules/
+npm-debug.log

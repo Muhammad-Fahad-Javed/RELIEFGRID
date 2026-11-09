@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mohalla Ops</string>
+    <string name="tagline">Practice today. Respond better tomorrow.</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_stations">Stations</string>
+    <string name="nav_drill">Drill</string>
+    <string name="nav_map">Map</string>
+    <string name="nav_activity">Activity</string>
+    <string name="skip">Skip</string>
+    <string name="next">Continue</string>
+    <string name="get_started">Get started</string>
+    <string name="ob1_title">Practice before emergencies</string>
+    <string name="ob1_body">Neighborhood drills show where a plan breaks, before a real flood does.</string>
+    <string name="ob2_title">Coordinate supplies and volunteers</string>
+    <string name="ob2_body">Residents, station leads, volunteers and the drill leader each have their own responsibilities.</string>
+    <string name="ob3_title">Discover a better plan</string>
+    <string name="ob3_body">Compare two runs of the same scenario and see which plan serves more families.</string>
+    <string name="demo_banner">Practice drill — simulated data, not an emergency system</string>
+</resources>

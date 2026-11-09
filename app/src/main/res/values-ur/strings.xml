@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">محلہ اپس</string>
+    <string name="tagline">آج مشق کریں، کل بہتر جواب دیں۔</string>
+    <string name="nav_home">ہوم</string>
+    <string name="nav_stations">اسٹیشن</string>
+    <string name="nav_drill">مشق</string>
+    <string name="nav_map">نقشہ</string>
+    <string name="nav_activity">سرگرمی</string>
+    <string name="skip">چھوڑیں</string>
+    <string name="next">آگے</string>
+    <string name="get_started">شروع کریں</string>
+    <string name="ob1_title">ہنگامی حالات سے پہلے مشق کریں</string>
+    <string name="ob1_body">محلے کی مشقیں دکھاتی ہیں کہ منصوبہ کہاں ناکام ہوتا ہے، اصل سیلاب سے پہلے۔</string>
+    <string name="ob2_title">سامان اور رضاکاروں کو منظم کریں</string>
+    <string name="ob2_body">رہائشی، اسٹیشن لیڈ، رضاکار اور ڈرل لیڈر سب کی اپنی ذمہ داریاں ہیں۔</string>
+    <string name="ob3_title">بہتر منصوبہ دریافت کریں</string>
+    <string name="ob3_body">ایک ہی منظرنامے کی دو مشقوں کا موازنہ کریں اور دیکھیں کون سا منصوبہ زیادہ خاندانوں تک پہنچا۔</string>
+    <string name="demo_banner">مشقی ڈرل — فرضی ڈیٹا، یہ ہنگامی نظام نہیں ہے</string>
+</resources>
