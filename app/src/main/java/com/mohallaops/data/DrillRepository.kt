@@ -200,12 +200,14 @@ class DrillRepository(
         db.withTransaction {
             val d = dao.getDelivery(deliveryId)
             rule(d != null, "Delivery not found")
-            need(isLeader(actor) || leadsStation(actor, d!!.stationId), "Not allowed to reassign this delivery")
-            rule(d.status == S.PENDING_ASSIGNMENT, "Delivery does not need a replacement")
+            val delivery = d!!
+            need(isLeader(actor) || leadsStation(actor, delivery.stationId), "Not allowed to reassign this delivery")
+            rule(delivery.status == S.PENDING_ASSIGNMENT, "Delivery does not need a replacement")
             val v = dao.nextVolunteer("")
             rule(v != null, "No available volunteer")
-            dao.setDeliveryStatusAndVolunteer(d.id, S.D_ASSIGNED, v!!.id)
-            log("DELIVERY_REASSIGNED", actor.name, "Delivery ${d.id} assigned to ${v.id}", d.stationId)
+            val volunteer = v!!
+            dao.setDeliveryStatusAndVolunteer(delivery.id, S.D_ASSIGNED, volunteer.id)
+            log("DELIVERY_REASSIGNED", actor.name, "Delivery ${delivery.id} assigned to ${volunteer.id}", delivery.stationId)
         }
     }
 
